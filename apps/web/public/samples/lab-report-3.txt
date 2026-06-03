@@ -1,0 +1,16 @@
+LAB REPORT #3
+
+Patient: Maria Gonzalez
+DOB: 1990-07-22
+
+Diagnosis: Iron deficiency anemia
+
+Medications: Ferrous sulfate 325mg daily
+
+Allergies: Sulfa drugs (hives)
+
+Results: Hemoglobin 9.8 g/dL; Ferritin 8 ng/mL
+
+Follow-up: Recheck CBC in 6 weeks.
+
+Pathologist: Dr. Emily Park, MD

@@ -1,0 +1,16 @@
+PROGRESS NOTE #2
+
+Patient: Robert Kim
+DOB: 1972-11-08
+
+Diagnosis: Essential Hypertension
+
+Medications: Lisinopril 10mg daily; Amlodipine 5mg daily
+
+Allergies: None known
+
+Assessment: Blood pressure improved to 128/82 on current regimen.
+
+Follow-up: Primary care in 4 weeks for BP check.
+
+Provider: Dr. Alex Rivera, MD

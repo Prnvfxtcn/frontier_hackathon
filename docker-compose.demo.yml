@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    entrypoint: ["anvil", "--host", "0.0.0.0", "--port", "8545", "--chain-id", "84532", "--block-time", "1"]
+    ports:
+      - "8545:8545"
+    healthcheck:
+      test: ["CMD", "cast", "block-number", "--rpc-url", "http://127.0.0.1:8545"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  deploy:
+    image: ghcr.io/foundry-rs/foundry:latest
+    depends_on:
+      anvil:
+        condition: service_healthy
+    working_dir: /work/packages/contracts
+    volumes:
+      - ..:/work
+    environment:
+      DEPLOYER_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        forge script script/Deploy.s.sol --rpc-url http://anvil:8545 --broadcast --private-key $$DEPLOYER_PRIVATE_KEY
+        echo "Deployed."
+
+  ai:
+    build:
+      context: ..
+      dockerfile: docker/ai/Dockerfile
+    environment:
+      USE_MOCK_EXTRACTOR: "true"
+      COHERENCE_THRESHOLD: "80"
+      AGREEMENT_THRESHOLD: "80"
+    ports:
+      - "8000:8000"
+    depends_on:
+      deploy:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/web/Dockerfile
+      args:
+        NEXT_PUBLIC_RPC_URL: http://host.docker.internal:8545
+    ports:
+      - "3000:3000"
+    depends_on:
+      - ai
+      - anvil
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  verifier:
+    image: node:20-bookworm
+    depends_on:
+      - web
+      - anvil
+    working_dir: /work
+    volumes:
+      - ..:/work
+    environment:
+      NEXT_PUBLIC_RPC_URL: http://anvil:8545
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sleep 15
+        echo "Verifier: run ./scripts/golden-path.sh after configuring env from deploy output"
+        echo "Browse http://localhost:3000/verify"

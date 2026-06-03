@@ -1,0 +1,24 @@
+DISCHARGE SUMMARY #1
+
+Patient: Jane Martinez
+DOB: 1985-03-14
+MRN: SYN-10042
+
+Admission Date: 2026-04-01
+Discharge Date: 2026-04-05
+
+Chief Complaint: Hyperglycemia and fatigue.
+
+Diagnosis: Type 2 Diabetes Mellitus, uncontrolled
+
+Medications: Metformin 500mg BID; Glipizide 5mg daily
+
+Allergies: Penicillin (rash)
+
+Hospital Course:
+Patient presented with elevated fasting glucose (248 mg/dL). Endocrinology consulted.
+Insulin sliding scale used during admission. Dietary education provided.
+
+Follow-up: Endocrinology clinic in 2 weeks; repeat HbA1c in 3 months.
+
+Attending: Dr. Sarah Chen, MD

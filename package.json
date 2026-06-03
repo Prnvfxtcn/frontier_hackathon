@@ -1,0 +1,12 @@
+{
+  "name": "aegis",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx pnpm@9 --filter @aegis/web dev",
+    "dev:ai": "cd services/ai && python3 -m uvicorn main:app --reload --port 8000",
+    "build": "npx pnpm@9 --filter @aegis/web build",
+    "test:contracts": "cd packages/contracts && forge test",
+    "golden-path": "bash scripts/golden-path.sh"
+  }
+}
