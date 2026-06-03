@@ -113,7 +113,7 @@ export default function ShowcasePage() {
                 className="group flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 bg-gradient-to-r from-white to-slate-50/50 p-5 transition hover:-translate-y-0.5 hover:border-teal-200/60 hover:shadow-card-hover"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Receipt ID</p>
+                  <p className="field-label">Receipt ID</p>
                   <button
                     type="button"
                     onClick={() => copyId(r.id)}

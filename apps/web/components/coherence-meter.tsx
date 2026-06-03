@@ -13,19 +13,19 @@ export function CoherenceMeter({ score }: { score: number }) {
     score >= 80 ? "Admissible" : score >= 60 ? "Marginal" : "Below threshold";
 
   return (
-    <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-50/80 to-white p-5">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-end justify-between">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">
             Coherence Score
           </span>
-          <p className="mt-0.5 text-xs text-slate-400">{label} · threshold ≥ 80</p>
+          <p className="mt-0.5 text-xs text-slate-600">{label} · threshold ≥ 80</p>
         </div>
         <motion.span
           key={score}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="font-display text-4xl font-bold gradient-text"
+          className="font-display text-4xl font-bold text-teal-700"
         >
           {score}
         </motion.span>
@@ -52,8 +52,8 @@ export function RigorBadges({ rigors }: { rigors: Record<string, boolean> }) {
           key={k}
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold capitalize ring-1 ${
             rigors[k]
-              ? "bg-emerald-500/10 text-emerald-700 ring-emerald-500/20"
-              : "bg-rose-500/10 text-rose-700 ring-rose-500/20"
+              ? "bg-emerald-100 text-emerald-900 ring-emerald-300"
+              : "bg-rose-100 text-rose-900 ring-rose-300"
           }`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${rigors[k] ? "bg-emerald-500" : "bg-rose-500"}`} />

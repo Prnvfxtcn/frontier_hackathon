@@ -56,8 +56,8 @@ export function OnChainProof({ receiptId }: Props) {
 
       <dl className="mt-4 grid gap-3 text-sm">
         <div>
-          <dt className="font-semibold text-slate-700">Shareable verify URL</dt>
-          <dd className="mt-1 break-all font-mono text-xs text-slate-600">{publicVerifyUrl(receiptId)}</dd>
+          <dt className="font-semibold text-slate-800">Shareable verify URL</dt>
+          <dd className="mt-1 break-all font-mono text-xs text-slate-700">{publicVerifyUrl(receiptId)}</dd>
           <Button className="mt-2" size="sm" variant="secondary" onClick={() => void copyShareLink()}>
             {copied ? "Copied" : "Copy link"}
           </Button>

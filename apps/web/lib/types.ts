@@ -105,4 +105,5 @@ export const SAMPLE_DOCS = [
   { id: "discharge-summary-1", label: "Discharge Summary #1", path: "/samples/discharge-summary-1.txt" },
   { id: "progress-note-2", label: "Progress Note #2", path: "/samples/progress-note-2.txt" },
   { id: "lab-report-3", label: "Lab Report #3", path: "/samples/lab-report-3.txt" },
+  { id: "case-04-hard", label: "Hard Case #1", path: "/samples/case-04-hard.txt" },
 ] as const;

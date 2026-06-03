@@ -5,8 +5,12 @@ import {
   evaluateExtractForMint,
   getRunInferenceBlockReason,
   isEnsembleGateRejected,
+  normalizeConsentId,
   showEnsembleRejectionBanner,
 } from "./provider-inference";
+
+const VALID_CONSENT =
+  "0x806726fa0131e30d352221755b9afd29d50dd5637995d0e7720b7e38e1ab12cd" as const;
 
 function mockEnsembleExtract(overrides: Partial<ExtractResponse> = {}): ExtractResponse {
   return {
@@ -124,6 +128,25 @@ describe("getRunInferenceBlockReason", () => {
     ).toBe("Select a consent");
     expect(
       getRunInferenceBlockReason({ address: "0xabc", documentText: "doc", consentId: "0x1", loading: false })
+    ).toBe("Consent ID invalid — pick from the dropdown (0x + 64 hex chars)");
+    expect(
+      getRunInferenceBlockReason({
+        address: "0xabc",
+        documentText: "doc",
+        consentId: VALID_CONSENT,
+        loading: false,
+      })
     ).toBeNull();
+  });
+});
+
+describe("normalizeConsentId", () => {
+  it("extracts first valid bytes32 from corrupted input", () => {
+    const corrupted = `${VALID_CONSENT}806726fa0131e30d352221755b9afd29d50dd5637995d0e7720b7e38e1`;
+    expect(normalizeConsentId(corrupted)).toBe(VALID_CONSENT);
+  });
+
+  it("returns null when no valid bytes32 present", () => {
+    expect(normalizeConsentId("0xabc")).toBeNull();
   });
 });

@@ -80,7 +80,7 @@ export default function ReconciliationPage() {
           <div className="mt-4 overflow-hidden rounded-xl border border-slate-200/70">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-200/70 bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <tr className="border-b border-slate-200 bg-slate-100 text-left text-xs font-semibold uppercase tracking-wider text-slate-700">
                   <th className="px-4 py-3">Receipt</th>
                   <th className="px-4 py-3">Provider</th>
                   <th className="px-4 py-3">Amount</th>
@@ -91,14 +91,14 @@ export default function ReconciliationPage() {
                 {rows.map((r, i) => (
                   <tr
                     key={r.receiptId}
-                    className={`border-b border-slate-100 transition hover:bg-teal-50/30 ${
-                      i % 2 === 0 ? "bg-white/50" : "bg-slate-50/30"
+                    className={`border-b border-slate-100 transition hover:bg-teal-50 ${
+                      i % 2 === 0 ? "bg-white" : "bg-slate-50"
                     }`}
                   >
-                    <td className="px-4 py-3 font-mono text-xs text-teal-700">{r.receiptId.slice(0, 18)}…</td>
-                    <td className="px-4 py-3 font-mono text-xs">{r.provider.slice(0, 12)}…</td>
-                    <td className="px-4 py-3 font-semibold text-emerald-700">{r.amount} mUSDC</td>
-                    <td className="px-4 py-3 text-slate-600">{new Date(r.timestamp * 1000).toLocaleString()}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-teal-800">{r.receiptId.slice(0, 18)}…</td>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-800">{r.provider.slice(0, 12)}…</td>
+                    <td className="px-4 py-3 font-semibold text-emerald-800">{r.amount} mUSDC</td>
+                    <td className="px-4 py-3 text-slate-800">{new Date(r.timestamp * 1000).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

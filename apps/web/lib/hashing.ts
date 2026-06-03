@@ -51,13 +51,37 @@ export function applyModelVersions<T extends ExtractResponse>(extract: T): T {
   return next;
 }
 
-export function applyExtractHashes<T extends { fields: ExtractField[] }>(
+export function applyExtractHashes<T extends ExtractResponse>(
   extract: T,
   documentText: string
 ): T & { inputHash: string; outputHash: string } {
-  return {
+  const next: T & { inputHash: string; outputHash: string } = {
     ...extract,
     inputHash: hashDocument(documentText),
     outputHash: hashFields(extract.fields),
   };
+
+  if (extract.ensemble && extract.models?.[1]) {
+    const secondOutputHash = hashFields(extract.models[1].fields);
+    next.secondOutputHash = secondOutputHash;
+    next.models = extract.models.map((model, index) =>
+      index === 1 ? { ...model, outputHash: secondOutputHash } : model
+    );
+  }
+
+  return next;
+}
+
+/** Canonical second-model hash for verify — prefer stored mint value over re-hash. */
+export function secondOutputHashFromExtract(extract: ExtractResponse): `0x${string}` | null {
+  if (extract.secondOutputHash) {
+    return extract.secondOutputHash as `0x${string}`;
+  }
+  if (extract.models?.[1]?.outputHash) {
+    return extract.models[1].outputHash as `0x${string}`;
+  }
+  if (extract.models?.[1]?.fields) {
+    return hashFields(extract.models[1].fields);
+  }
+  return null;
 }

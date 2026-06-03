@@ -35,7 +35,8 @@ services:
     environment:
       USE_MOCK_EXTRACTOR: "true"
       COHERENCE_THRESHOLD: "80"
-      AGREEMENT_THRESHOLD: "80"
+      # AGREEMENT_THRESHOLD: minimum overall ensemble agreement (0-100) required before a receipt can be minted. Default 80; raised to 90 for the demo to surface natural model variance on hard cases.
+      AGREEMENT_THRESHOLD: "90"
     ports:
       - "8000:8000"
     depends_on:

@@ -93,21 +93,21 @@ export default function InferencePage({ params }: { params: { id: string } }) {
               <SectionTitle title="On-Chain Hashes" />
               <div className="mt-3 space-y-2">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">inputHash</p>
+                  <p className="field-label">inputHash</p>
                   <p className="mono-block mt-1">{extract.inputHash}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">outputHash (A)</p>
+                  <p className="field-label">outputHash (A)</p>
                   <p className="mono-block mt-1">{extract.outputHash}</p>
                 </div>
                 {extract.secondOutputHash && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">outputHash (B)</p>
+                    <p className="field-label">outputHash (B)</p>
                     <p className="mono-block mt-1">{extract.secondOutputHash}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">model</p>
+                  <p className="field-label">model</p>
                   <p className="mt-1 font-semibold text-teal-700">
                     {formatModelLabel(extract.modelId, extract.mock)}
                   </p>
@@ -164,7 +164,7 @@ export default function InferencePage({ params }: { params: { id: string } }) {
                       key={f.key}
                       className="rounded-xl border border-slate-200/60 bg-slate-50/50 px-4 py-3 text-sm"
                     >
-                      <span className="text-xs font-bold uppercase tracking-wide text-slate-400">{f.key}</span>
+                      <span className="text-xs font-bold uppercase tracking-wide text-slate-600">{f.key}</span>
                       <p className="mt-1 font-medium text-slate-800">{f.value ?? "null"}</p>
                     </li>
                   ))}

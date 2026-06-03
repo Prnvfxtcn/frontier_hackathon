@@ -1,0 +1,22 @@
+PROGRESS NOTE — 26-Apr-2026
+Pt: J. Martinez | DOB: 03/14/85 | MRN: SYN-10042
+
+S: Pt c/o polyuria, polydipsia, mild fatigue x 3 weeks. No CP, SOB, n/v.
+   AOx3.
+
+O: VS — HR 92, BP 138/86, T 98.7, BMI 31.
+   Labs — fasting glucose 248 mg/dL; HbA1c 9.2%; BMP wnl.
+   Started high-dose prednisone 4 weeks ago for r/o autoimmune flare.
+
+A: Hyperglycemia, etiology unclear:
+   - T2DM (likely, given BMI + family Hx)
+   - Steroid-induced (recent prednisone, temporal correlation)
+   - r/o MODY (atypical age progression, will trend)
+
+P: Start Glucophage XR 500 BID; consider GLP-1 if A1c not improving.
+   Taper prednisone with rheum. Endo c/s in 2/52, recheck HbA1c, fasting
+   BMP. F/u 1 month.
+
+Imp: Mixed picture — T2DM vs steroid effect. Will trend.
+
+Attending: Dr. S. Chen, MD

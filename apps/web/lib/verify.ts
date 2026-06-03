@@ -1,7 +1,7 @@
 import type { ExtractResponse, Receipt, VerifyResult } from "./types";
 import { publicClient, contractAddresses, consentRegistryAbi, inferenceRegistryAbi } from "./contracts";
 import { DEFAULT_SCOPE_HASH } from "./crypto";
-import { hashDocument, hashFields, hashModelDigest } from "./hashing";
+import { hashDocument, hashFields, hashModelDigest, secondOutputHashFromExtract } from "./hashing";
 import { formatDigestBadge } from "./model-digest";
 
 function isEnsembleReceipt(receipt: Receipt): boolean {
@@ -72,11 +72,17 @@ export async function verifyReceipt(params: {
     }
 
     if (params.extract.ensemble && params.extract.models?.[1] && isEnsembleReceipt(receipt!)) {
-      const secondHash = hashFields(params.extract.models[1].fields);
+      const secondHash = secondOutputHashFromExtract(params.extract);
+      const recomputed = hashFields(params.extract.models[1].fields);
+      const matchesOnChain =
+        secondHash != null &&
+        receipt!.secondOutputHash.toLowerCase() === secondHash.toLowerCase();
       checks.push({
         label: "Second output hash match (model B)",
-        ok: receipt!.secondOutputHash.toLowerCase() === secondHash.toLowerCase(),
-        detail: `${receipt!.secondOutputHash} vs ${secondHash}`,
+        ok: matchesOnChain,
+        detail: matchesOnChain
+          ? `${receipt!.secondOutputHash} (matches minted model B output)`
+          : `${receipt!.secondOutputHash} vs ${secondHash ?? recomputed}`,
       });
       checks.push({
         label: "Agreement score on-chain",
@@ -99,17 +105,15 @@ export async function verifyReceipt(params: {
       try {
         const inputHash = hashDocument(params.documentText);
         const outputHash = hashFields(params.extract.fields);
-        if (isEnsembleReceipt(receipt!) && params.extract.secondOutputHash) {
+        if (isEnsembleReceipt(receipt!)) {
+          const secondHash =
+            secondOutputHashFromExtract(params.extract) ??
+            hashFields(params.extract.models![1].fields);
           const onChainOk = await publicClient.readContract({
             address: contractAddresses.inferenceRegistry,
             abi: inferenceRegistryAbi,
             functionName: "verifyEnsembleReceipt",
-            args: [
-              params.receiptId,
-              inputHash,
-              outputHash,
-              params.extract.secondOutputHash as `0x${string}`,
-            ],
+            args: [params.receiptId, inputHash, outputHash, secondHash],
           });
           checks.push({
             label: "Contract verifyEnsembleReceipt()",

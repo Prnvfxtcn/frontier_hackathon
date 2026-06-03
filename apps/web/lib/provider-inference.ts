@@ -1,7 +1,7 @@
 import type { ExtractResponse } from "./types";
 
 export const ENSEMBLE_REJECTION_BANNER = "⛔ Ensemble gate rejected — receipt NOT minted";
-export const AGREEMENT_THRESHOLD = 80;
+export const AGREEMENT_THRESHOLD = Number(process.env.NEXT_PUBLIC_AGREEMENT_THRESHOLD ?? 80);
 
 export function shouldBlockReceiptMint(extract: ExtractResponse): boolean {
   return !extract.admissible;
@@ -63,6 +63,11 @@ export function logEnsembleResponse(extract: ExtractResponse, forceDisagreeToggl
 }
 
 /** First failing guard for Run Inference — mirrors runInference() preconditions. */
+export function normalizeConsentId(raw: string): `0x${string}` | null {
+  const match = raw.trim().match(/0x[a-fA-F0-9]{64}/);
+  return match ? (match[0].toLowerCase() as `0x${string}`) : null;
+}
+
 export function getRunInferenceBlockReason(params: {
   address?: string;
   documentText: string;
@@ -73,5 +78,8 @@ export function getRunInferenceBlockReason(params: {
   if (!params.address) return "Connect wallet";
   if (!params.documentText.trim()) return "Load a document";
   if (!params.consentId.trim()) return "Select a consent";
+  if (!normalizeConsentId(params.consentId)) {
+    return "Consent ID invalid — pick from the dropdown (0x + 64 hex chars)";
+  }
   return null;
 }

@@ -40,7 +40,7 @@ export function ReceiptIdCard({
         </Link>
       </div>
       {txHash && (
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-slate-600">
           Tx hash (not receipt ID): <span className="font-mono break-all">{txHash}</span>
         </p>
       )}

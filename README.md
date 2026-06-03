@@ -117,7 +117,7 @@ See `LICENSE` for terms.
 
 ## Built by
 
-**Pranav Barot** — pranav@foxtcon.com · Foxtcon · Frontier Technology
+**Pranav Barot** — pbarot2813@gmail.com · Frontier Technology
 Hackathon 2026 · Keystone Innovation District
 
 ---

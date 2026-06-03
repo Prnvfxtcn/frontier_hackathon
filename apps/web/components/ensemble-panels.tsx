@@ -44,7 +44,7 @@ export function EnsemblePanels({
             </h3>
             {(idx === 0 ? extract.digestA ?? model.modelDigest : extract.digestB ?? model.modelDigest) && (
               <p
-                className="mt-1 font-mono text-[10px] text-slate-500"
+                className="mt-1 font-mono text-[10px] text-slate-600"
                 title={idx === 0 ? extract.digestA ?? model.modelDigest : extract.digestB ?? model.modelDigest}
               >
                 {formatDigestBadge(
@@ -52,7 +52,7 @@ export function EnsemblePanels({
                 )}
               </p>
             )}
-            <p className="mt-1 text-xs text-slate-500">Coherence {model.coherenceScore}</p>
+            <p className="mt-1 text-xs text-slate-600">Coherence {model.coherenceScore}</p>
             <ul className="mt-3 space-y-2">
               {model.fields.map((f) => {
                 const ag = perField[f.key] ?? 0;
@@ -84,7 +84,7 @@ export function EnsemblePanels({
         ))}
       </div>
       {showGateCaption && (
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-slate-600">
           Gate threshold: agreement ≥ {AGREEMENT_THRESHOLD}% — current {overall}%.
         </p>
       )}

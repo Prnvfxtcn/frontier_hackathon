@@ -83,7 +83,7 @@ export function NetworkBanner() {
           Add / switch network
         </button>
       </div>
-      {message && <p className="mx-auto mt-1.5 max-w-6xl text-xs opacity-80">{message}</p>}
+      {message && <p className="mx-auto mt-1.5 max-w-6xl text-xs text-amber-900">{message}</p>}
     </div>
   );
 }

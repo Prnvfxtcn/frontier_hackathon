@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hashDocument, hashFields, hashModelDigest, applyModelVersions, canonicalFieldValues } from "./hashing";
+import { hashDocument, hashFields, hashModelDigest, applyModelVersions, applyExtractHashes, canonicalFieldValues } from "./hashing";
 import type { ExtractField } from "./types";
 
 const sampleFields: ExtractField[] = [
@@ -61,5 +61,29 @@ describe("hashing", () => {
     });
     expect(updated.modelVersion).toEqual(hashModelDigest(digestA));
     expect(updated.secondModelVersion).toEqual(hashModelDigest(digestB));
+  });
+
+  it("applyExtractHashes sets secondOutputHash from model B fields in ensemble mode", () => {
+    const modelBFields: ExtractField[] = [
+      { key: "dob", value: "1980-01-02", sourceSpan: { start: 0, end: 10 }, grounding: 1 },
+    ];
+    const updated = applyExtractHashes(
+      {
+        fields: sampleFields,
+        coherenceScore: 96,
+        rigors: {},
+        admissible: true,
+        ensemble: true,
+        models: [
+          { modelId: "a", fields: sampleFields, outputHash: "0xwrong" },
+          { modelId: "b", fields: modelBFields, outputHash: "0xalso-wrong" },
+        ],
+        secondOutputHash: "0xlegacy-from-ai",
+      } as Parameters<typeof applyExtractHashes>[0],
+      "doc text"
+    );
+    const expected = hashFields(modelBFields);
+    expect(updated.secondOutputHash).toEqual(expected);
+    expect(updated.models?.[1]?.outputHash).toEqual(expected);
   });
 });

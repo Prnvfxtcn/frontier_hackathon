@@ -61,7 +61,7 @@ export default function HomePage() {
           <h1 className="font-display text-5xl font-bold tracking-tight md:text-6xl">
             Aegis
           </h1>
-          <p className="mt-6 text-lg leading-relaxed text-teal-50/90 md:text-xl">
+          <p className="mt-6 text-lg leading-relaxed text-white md:text-xl">
             Privacy-preserving clinical AI with cryptographic consent, local inference, and
             tamper-proof proof-of-inference receipts — settled per use in mock USDC.
           </p>
@@ -87,10 +87,10 @@ export default function HomePage() {
         {features.map((f) => (
           <div
             key={f.label}
-            className="rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-card backdrop-blur-sm transition hover:-translate-y-0.5 hover:shadow-card-hover"
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover"
           >
             <p className="font-display text-sm font-bold text-slate-900">{f.label}</p>
-            <p className="mt-1 text-xs text-slate-500">{f.desc}</p>
+            <p className="mt-1 text-xs text-slate-600">{f.desc}</p>
           </div>
         ))}
       </div>
@@ -99,7 +99,7 @@ export default function HomePage() {
       <div>
         <div className="mb-6 text-center">
           <h2 className="font-display text-2xl font-bold text-slate-900">Choose your role</h2>
-          <p className="mt-2 text-slate-500">Three perspectives on the same trust layer</p>
+          <p className="mt-2 text-slate-600">Three perspectives on the same trust layer</p>
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {roles.map((r) => (
@@ -121,25 +121,25 @@ export default function HomePage() {
       </div>
 
       {/* Flow */}
-      <section className="rounded-3xl border border-slate-200/60 bg-white/60 p-8 shadow-card backdrop-blur-sm md:p-10">
+      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-card md:p-10">
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-600">
             <ChainIcon />
           </div>
           <div>
             <h2 className="font-display text-xl font-bold text-slate-900">Golden path</h2>
-            <p className="text-sm text-slate-500">End-to-end demo flow in four steps</p>
+            <p className="text-sm text-slate-600">End-to-end demo flow in four steps</p>
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-4">
           {flow.map((f, i) => (
-            <div key={f.step} className="relative rounded-2xl border border-slate-200/60 bg-white/80 p-5">
+            <div key={f.step} className="relative rounded-2xl border border-slate-200 bg-slate-50 p-5">
               {i < flow.length - 1 && (
                 <div className="absolute right-0 top-1/2 hidden h-px w-4 translate-x-full bg-gradient-to-r from-teal-300 to-transparent md:block" />
               )}
               <span className="font-mono text-xs font-bold text-teal-600">{f.step}</span>
               <h3 className="mt-2 font-display font-bold text-slate-900">{f.title}</h3>
-              <p className="mt-1 text-sm text-slate-500">{f.body}</p>
+              <p className="mt-1 text-sm text-slate-700">{f.body}</p>
             </div>
           ))}
         </div>

@@ -245,7 +245,7 @@ function VerifyContent() {
               >
                 <div>
                   <div className="font-semibold text-slate-800">{c.label}</div>
-                  {c.detail && <div className="mt-1 font-mono text-xs text-slate-500 break-all">{c.detail}</div>}
+                  {c.detail && <div className="mt-1 font-mono text-xs text-slate-700 break-all">{c.detail}</div>}
                 </div>
                 <Badge ok={c.ok} label={c.ok ? "pass" : "fail"} />
               </li>

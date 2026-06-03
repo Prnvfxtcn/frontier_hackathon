@@ -32,6 +32,17 @@ type AccessRow = {
   timestamp: number;
 };
 
+/** Format for <input type="datetime-local" /> */
+function formatDatetimeLocal(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** Default: 30 days from now — long enough for demo without expiring mid-session */
+function defaultConsentExpiry(): string {
+  return formatDatetimeLocal(new Date(Date.now() + 30 * 86400000));
+}
+
 export default function PatientPage() {
   const { address, isConnected } = useAccount();
   const publicClient = aegisPublicClient;
@@ -39,7 +50,7 @@ export default function PatientPage() {
 
   const [provider, setProvider] = useState("");
   const [purpose, setPurpose] = useState(0);
-  const [expiry, setExpiry] = useState("");
+  const [expiry, setExpiry] = useState(defaultConsentExpiry);
   const [scope, setScope] = useState<string[]>([...FIELD_CATEGORIES]);
   const [consents, setConsents] = useState<ConsentRow[]>([]);
   const [accessLog, setAccessLog] = useState<AccessRow[]>([]);
@@ -186,11 +197,19 @@ export default function PatientPage() {
               <option key={p} value={i}>{p}</option>
             ))}
           </Select>
-          <Input
-            type="datetime-local"
-            value={expiry}
-            onChange={(e) => setExpiry(e.target.value)}
-          />
+          <label className="block text-sm font-semibold text-slate-800 md:col-span-2">
+            Consent expiry
+            <Input
+              className="mt-1.5"
+              type="datetime-local"
+              value={expiry}
+              onChange={(e) => setExpiry(e.target.value)}
+              title="Provider access ends at this date/time — stored on-chain as expiresAt"
+            />
+            <span className="mt-1 block text-xs font-normal text-slate-600">
+              When this date passes, the provider can no longer run inference under this consent (unless you grant a new one).
+            </span>
+          </label>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           {FIELD_CATEGORIES.map((f) => (
@@ -235,7 +254,7 @@ export default function PatientPage() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/80 bg-slate-50 px-2.5 py-1 font-mono text-[10px] text-slate-600"
               title={scopeHash}
             >
-              <span className="font-sans font-semibold uppercase tracking-wide text-slate-400">Scope commitment</span>
+              <span className="font-sans font-semibold uppercase tracking-wide text-slate-600">Scope commitment</span>
               {scopeHash.slice(0, 10)}…{scopeHash.slice(-6)}
             </span>
           )}

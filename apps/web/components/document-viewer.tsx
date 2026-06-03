@@ -3,12 +3,12 @@
 import type { ExtractField } from "@/lib/types";
 
 const fieldColors: Record<string, string> = {
-  patientName: "bg-violet-200/80 text-violet-900 ring-violet-300/50",
-  dob: "bg-blue-200/80 text-blue-900 ring-blue-300/50",
-  diagnosis: "bg-rose-200/80 text-rose-900 ring-rose-300/50",
-  medications: "bg-emerald-200/80 text-emerald-900 ring-emerald-300/50",
-  allergies: "bg-amber-200/80 text-amber-900 ring-amber-300/50",
-  followUp: "bg-cyan-200/80 text-cyan-900 ring-cyan-300/50",
+  patientName: "bg-violet-300 text-violet-950 ring-violet-400",
+  dob: "bg-blue-300 text-blue-950 ring-blue-400",
+  diagnosis: "bg-rose-300 text-rose-950 ring-rose-400",
+  medications: "bg-emerald-300 text-emerald-950 ring-emerald-400",
+  allergies: "bg-amber-300 text-amber-950 ring-amber-400",
+  followUp: "bg-cyan-300 text-cyan-950 ring-cyan-400",
 };
 
 export function DocumentViewer({
@@ -38,14 +38,14 @@ export function DocumentViewer({
         <span className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
         <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
         <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
-        <span className="ml-2 text-xs font-medium text-slate-400">Clinical Document · Source Spans</span>
+        <span className="ml-2 text-xs font-medium text-slate-300">Clinical Document · Source Spans</span>
       </div>
-      <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap p-5 font-mono text-sm leading-relaxed text-slate-200">
+      <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap p-5 font-mono text-sm leading-relaxed text-slate-100">
         {segments.map((seg, i) => {
           const chunk = text.slice(seg.start, seg.end);
           if (!seg.key) return <span key={i}>{chunk}</span>;
           const active = seg.key === activeKey;
-          const colorClass = fieldColors[seg.key] ?? "bg-sky-200/80 text-sky-900 ring-sky-300/50";
+          const colorClass = fieldColors[seg.key] ?? "bg-sky-300 text-sky-950 ring-sky-400";
           return (
             <mark
               key={i}

@@ -158,8 +158,14 @@ def compute_coherence(fields: list[dict]) -> int:
 
 
 def keccak_hex(text: str) -> str:
-    h = hashlib.sha3_256(text.encode()).hexdigest()
-    return f"0x{h}"
+    """Ethereum Keccak-256 (not NIST SHA3-256)."""
+    try:
+        from Crypto.Hash import keccak as keccak256  # pycryptodome
+    except ImportError as exc:
+        raise RuntimeError("Install pycryptodome for Keccak-256 hashing") from exc
+    digest = keccak256.new(digest_bits=256)
+    digest.update(text.encode())
+    return f"0x{digest.hexdigest()}"
 
 
 def canonical_json(fields: list[dict]) -> str:

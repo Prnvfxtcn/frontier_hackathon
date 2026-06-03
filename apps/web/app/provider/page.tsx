@@ -26,6 +26,7 @@ import { buildMerkleRoot } from "@/lib/merkle";
 import { formatModelLabel } from "@/lib/model-labels";
 import { formatDigestBadge } from "@/lib/model-digest";
 import { ClientOnly } from "@/components/client-only";
+import { useMounted } from "@/hooks/use-mounted";
 import { EnsemblePanels } from "@/components/ensemble-panels";
 import {
   ENSEMBLE_REJECTION_BANNER,
@@ -34,6 +35,7 @@ import {
   getRunInferenceBlockReason,
   isEnsembleGateRejected,
   logEnsembleResponse,
+  normalizeConsentId,
 } from "@/lib/provider-inference";
 import { FIELD_CATEGORIES, SAMPLE_DOCS, type ExtractResponse } from "@/lib/types";
 
@@ -51,6 +53,7 @@ type AiHealth = {
 };
 
 export default function ProviderPage() {
+  const mounted = useMounted();
   const { address, isConnected } = useAccount();
   const publicClient = aegisPublicClient;
   const { writeContractAsync } = useWriteContract();
@@ -204,23 +207,47 @@ export default function ProviderPage() {
     }
   }
 
-  async function ensureSettlementAllowance() {
+  async function ensureSettlementFunds() {
     if (!address || !price || !publicClient) return;
+    let bal = (await publicClient.readContract({
+      address: contractAddresses.mockUsdc,
+      abi: mockUsdcAbi,
+      functionName: "balanceOf",
+      args: [address],
+    })) as bigint;
+
+    if (bal < price) {
+      const mintHash = await writeContractAsync(withLocalGas({
+        address: contractAddresses.mockUsdc,
+        abi: mockUsdcAbi,
+        functionName: "mint",
+        args: [address, 10_000_000n],
+      }));
+      await waitForTx(mintHash, "mUSDC faucet mint failed.");
+      bal = (await publicClient.readContract({
+        address: contractAddresses.mockUsdc,
+        abi: mockUsdcAbi,
+        functionName: "balanceOf",
+        args: [address],
+      })) as bigint;
+      setBalance(bal);
+    }
+
     const allowance = (await publicClient.readContract({
       address: contractAddresses.mockUsdc,
       abi: mockUsdcAbi,
       functionName: "allowance",
       args: [address, contractAddresses.settlement],
     })) as bigint;
-    if (allowance >= price) return;
-
-    const hash = await writeContractAsync(withLocalGas({
-      address: contractAddresses.mockUsdc,
-      abi: mockUsdcAbi,
-      functionName: "approve",
-      args: [contractAddresses.settlement, maxUint256],
-    }));
-    await waitForTx(hash);
+    if (allowance < price) {
+      const hash = await writeContractAsync(withLocalGas({
+        address: contractAddresses.mockUsdc,
+        abi: mockUsdcAbi,
+        functionName: "approve",
+        args: [contractAddresses.settlement, maxUint256],
+      }));
+      await waitForTx(hash, "Settlement approval failed.");
+    }
   }
 
   async function runInference() {
@@ -228,28 +255,43 @@ export default function ProviderPage() {
       setMessage("Connect wallet, select document, and pick a consent.");
       return;
     }
+    const normalizedConsent = normalizeConsentId(consentId);
+    if (!normalizedConsent) {
+      setMessage("Consent ID invalid — select a consent from the dropdown (do not paste extra text).");
+      return;
+    }
+    if (normalizedConsent !== consentId) {
+      setConsentId(normalizedConsent);
+    }
+
     setLoading(true);
     setMessage("");
     setResult(null);
+    let extractDone = false;
     try {
       const valid = await publicClient!.readContract({
         address: contractAddresses.consentRegistry,
         abi: consentRegistryAbi,
         functionName: "isConsentValid",
-        args: [consentId as `0x${string}`, address, DEFAULT_SCOPE_HASH],
+        args: [normalizedConsent, address, DEFAULT_SCOPE_HASH],
       });
-      if (!valid) throw new Error("Consent invalid, expired, revoked, or scope mismatch.");
+      if (!valid) {
+        throw new Error(
+          "Consent invalid for this provider — re-grant on Patient after Anvil reset (patient 0x68d5…c560 → provider 0x1d42…2eab)."
+        );
+      }
 
       const rawExtract = await extractDocument({
         documentText,
         schema: [...FIELD_CATEGORIES],
-        consentId,
+        consentId: normalizedConsent,
         ensemble: ensembleMode,
         forceDisagree: ensembleMode && forceDisagree,
         format: "json",
       });
       const extract = applyModelVersions(applyExtractHashes(rawExtract, documentText));
       setResult(extract);
+      extractDone = true;
 
       if (ensembleMode) {
         logEnsembleResponse(extract, forceDisagree);
@@ -266,7 +308,7 @@ export default function ProviderPage() {
 
       const merkleRoot = buildMerkleRoot(extract.fields);
 
-      await ensureSettlementAllowance();
+      await ensureSettlementFunds();
 
       const txHash = await writeContractAsync(withLocalGas({
         address: contractAddresses.inferenceRegistry,
@@ -274,7 +316,7 @@ export default function ProviderPage() {
         functionName: "recordInference",
         args: [
           {
-            consentId: consentId as `0x${string}`,
+            consentId: normalizedConsent,
             provider: address,
             patientRef: "0x0000000000000000000000000000000000000000000000000000000000000000",
             inputHash: extract.inputHash as `0x${string}`,
@@ -294,7 +336,10 @@ export default function ProviderPage() {
         ],
       }));
 
-      await waitForTx(txHash);
+      await waitForTx(
+        txHash,
+        "recordInference reverted — check mUSDC balance, consent validity, and ensemble agreement ≥ 80% on-chain."
+      );
 
       const receipt = await publicClient!.getTransactionReceipt({ hash: txHash });
 
@@ -322,7 +367,7 @@ export default function ProviderPage() {
 
       localStorage.setItem(
         `aegis-doc-${receiptId}`,
-        JSON.stringify({ documentText, extract, txHash, consentId })
+        JSON.stringify({ documentText, extract, txHash, consentId: normalizedConsent })
       );
 
       const receiptInfo = { id: receiptId, txHash };
@@ -333,7 +378,7 @@ export default function ProviderPage() {
       router.push(`/inference/${receiptId}`);
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "Inference failed");
-      setResult(null);
+      if (!extractDone) setResult(null);
     } finally {
       setLoading(false);
     }
@@ -341,13 +386,15 @@ export default function ProviderPage() {
 
   const gateRejected = isEnsembleGateRejected(result);
   const showAdmissiblePreview = result && !gateRejected;
-  const runBlockReason = getRunInferenceBlockReason({
-    address,
-    documentText,
-    consentId,
-    loading,
-  });
-  const runDisabled = runBlockReason !== null;
+  const runBlockReason = mounted
+    ? getRunInferenceBlockReason({
+        address,
+        documentText,
+        consentId,
+        loading,
+      })
+    : null;
+  const runDisabled = !mounted || runBlockReason !== null;
 
   return (
     <div className="space-y-8 animate-slide-up">
@@ -357,34 +404,36 @@ export default function ProviderPage() {
         description="Run local AI extraction under valid consent. Pay per inference. Receive on-chain receipts."
         icon={<ProviderIcon className="h-7 w-7" />}
         badge={
-          aiHealth ? (
-            <div className="flex flex-wrap gap-2">
-              <Pill variant={aiHealth.mock ? "warning" : "success"}>
-                Model A: {formatModelLabel(aiHealth.modelA ?? aiHealth.model, aiHealth.mock)}
-              </Pill>
-              {ensembleMode && (
+          <ClientOnly>
+            {aiHealth ? (
+              <div className="flex flex-wrap gap-2">
                 <Pill variant={aiHealth.mock ? "warning" : "success"}>
-                  Model B: {formatModelLabel(aiHealth.modelB ?? "qwen2.5:7b", aiHealth.mock)}
+                  Model A: {formatModelLabel(aiHealth.modelA ?? aiHealth.model, aiHealth.mock)}
                 </Pill>
-              )}
-              {ensembleMode && !aiHealth.mock && (
-                <Pill variant="info">Ensemble ON — two models must agree</Pill>
-              )}
-              {ensembleMode && aiHealth.modelBReady === false && (
-                <Pill variant="warning">Pulling {aiHealth.modelB ?? "Model B"}…</Pill>
-              )}
-              {aiHealth.modelADigest && (
-                <Pill variant="info" title={aiHealth.modelADigest}>
-                  A digest: {formatDigestBadge(aiHealth.modelADigest)}
-                </Pill>
-              )}
-              {ensembleMode && aiHealth.modelBDigest && (
-                <Pill variant="info" title={aiHealth.modelBDigest}>
-                  B digest: {formatDigestBadge(aiHealth.modelBDigest)}
-                </Pill>
-              )}
-            </div>
-          ) : undefined
+                {ensembleMode && (
+                  <Pill variant={aiHealth.mock ? "warning" : "success"}>
+                    Model B: {formatModelLabel(aiHealth.modelB ?? "qwen2.5:7b", aiHealth.mock)}
+                  </Pill>
+                )}
+                {ensembleMode && !aiHealth.mock && (
+                  <Pill variant="info">Ensemble ON — two models must agree</Pill>
+                )}
+                {ensembleMode && aiHealth.modelBReady === false && (
+                  <Pill variant="warning">Pulling {aiHealth.modelB ?? "Model B"}…</Pill>
+                )}
+                {aiHealth.modelADigest && (
+                  <Pill variant="info" title={aiHealth.modelADigest}>
+                    A digest: {formatDigestBadge(aiHealth.modelADigest)}
+                  </Pill>
+                )}
+                {ensembleMode && aiHealth.modelBDigest && (
+                  <Pill variant="info" title={aiHealth.modelBDigest}>
+                    B digest: {formatDigestBadge(aiHealth.modelBDigest)}
+                  </Pill>
+                )}
+              </div>
+            ) : null}
+          </ClientOnly>
         }
       />
 
@@ -396,10 +445,24 @@ export default function ProviderPage() {
         <ReceiptIdCard receiptId={lastReceipt.id} txHash={lastReceipt.txHash} />
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <StatCard label="Inference Price" value={price ? `${Number(price) / 1e6} mUSDC` : "—"} accent="teal" />
-        <StatCard label="Your Balance" value={`${Number(balance) / 1e6} mUSDC`} sub="Faucet available below" accent="cyan" />
-      </div>
+      <ClientOnly
+        fallback={
+          <div className="grid gap-4 sm:grid-cols-2">
+            <StatCard label="Inference Price" value="—" accent="teal" />
+            <StatCard label="Your Balance" value="—" sub="Faucet available below" accent="cyan" />
+          </div>
+        }
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <StatCard label="Inference Price" value={price ? `${Number(price) / 1e6} mUSDC` : "—"} accent="teal" />
+          <StatCard
+            label="Your Balance"
+            value={address ? `${Number(balance) / 1e6} mUSDC` : "Connect wallet"}
+            sub={address ? "Faucet available below" : undefined}
+            accent="cyan"
+          />
+        </div>
+      </ClientOnly>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -418,7 +481,10 @@ export default function ProviderPage() {
             placeholder="Paste clinical document text..."
           />
           <div className="mt-4 space-y-2">
-            <Select value={consentId} onChange={(e) => setConsentId(e.target.value)}>
+            <Select
+              value={normalizeConsentId(consentId) ?? ""}
+              onChange={(e) => setConsentId(e.target.value)}
+            >
               <option value="">Select consent granted to you</option>
               {consents.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -428,9 +494,13 @@ export default function ProviderPage() {
             </Select>
             <Input
               className="font-mono text-xs"
-              placeholder="Or paste consent ID (0x…)"
+              placeholder="Consent ID (auto-filled from dropdown — 0x + 64 hex chars)"
               value={consentId}
               onChange={(e) => setConsentId(e.target.value)}
+              onBlur={() => {
+                const normalized = normalizeConsentId(consentId);
+                if (normalized) setConsentId(normalized);
+              }}
             />
             {consentLoadError && <Alert variant="warning">{consentLoadError}</Alert>}
           </div>
@@ -486,7 +556,7 @@ export default function ProviderPage() {
             <p className="mt-2 text-xs font-medium text-amber-800">{runBlockReason}</p>
           )}
           {loading && (
-            <p className="mt-2 text-xs text-slate-500">
+            <p className="mt-2 text-xs text-slate-600">
               Running Llama 3.1 + Qwen 2.5 locally — first run can take up to 30s.
             </p>
           )}
@@ -526,7 +596,7 @@ export default function ProviderPage() {
             </div>
           ) : !showAdmissiblePreview ? (
             loading ? (
-              <div className="mt-4 flex flex-col items-center gap-3 py-10 text-center text-sm text-slate-500">
+              <div className="mt-4 flex flex-col items-center gap-3 py-10 text-center text-sm text-slate-700">
                 <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-teal-200 border-t-teal-600" />
                 <p>Running Llama 3.1 + Qwen 2.5 locally…</p>
                 <p className="text-xs">First run can take up to 30s.</p>

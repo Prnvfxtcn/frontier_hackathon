@@ -29,10 +29,13 @@ export async function checkContractsDeployed(): Promise<ContractsHealth> {
   return { ok: missing.length === 0, missing };
 }
 
-export async function waitForTx(hash: `0x${string}`) {
+export async function waitForTx(hash: `0x${string}`, hint?: string) {
   const receipt = await aegisPublicClient.waitForTransactionReceipt({ hash });
   if (receipt.status === "reverted") {
-    throw new Error("Transaction reverted on-chain.");
+    throw new Error(
+      hint ??
+        "Transaction reverted on-chain. Common causes: invalid consent, insufficient mUSDC balance, or agreement below threshold."
+    );
   }
   return receipt;
 }

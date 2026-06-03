@@ -26,7 +26,7 @@ export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/70 backdrop-blur-xl backdrop-saturate-150">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl backdrop-saturate-150">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <div className="flex items-center gap-8">
           <Link href="/" className="group flex items-center gap-2.5">
@@ -47,7 +47,7 @@ export function Nav() {
                   className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
                     active
                       ? "bg-teal-50 text-teal-700 ring-1 ring-teal-200/60"
-                      : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                      : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
                   {l.label}
@@ -63,7 +63,7 @@ export function Nav() {
               clearDemoStorage();
               alert("Demo local state cleared.");
             }}
-            className="hidden sm:inline-flex rounded-lg border border-slate-200/80 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-teal-200 hover:bg-teal-50/50"
+            className="hidden sm:inline-flex rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-teal-400 hover:bg-teal-50"
           >
             Reset Demo
           </button>

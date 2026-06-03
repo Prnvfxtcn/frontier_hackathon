@@ -26,6 +26,7 @@ pick() {
   pick NEXT_PUBLIC_AI_SERVICE_URL
   pick NEXT_PUBLIC_WALLETCONNECT_ID
   pick NEXT_PUBLIC_DEMO_RECEIPT_ID
+  pick NEXT_PUBLIC_AGREEMENT_THRESHOLD
 } | sed '/^$/d' > "$DEST"
 
 echo "Synced → $DEST"
